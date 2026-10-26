@@ -1,0 +1,50 @@
+# ---- secrets ----
+.env
+.env.*
+**/.env
+**/.env.*
+!**/.env.example
+!**/.env.development
+!**/.env.production
+*.pem
+*.p12
+*.pfx
+
+# ---- local runtime data ----
+data/
+apps/admin-api/data/
+docs/rag_data/
+docs/prompt.md
+docs/mananger
+*.db
+*.db-*
+*.sqlite
+*.sqlite3
+
+# ---- dependencies / caches ----
+.venv/
+**/.venv/
+node_modules/
+**/node_modules/
+__pycache__/
+*.py[cod]
+.mypy_cache/
+.pytest_cache/
+.ruff_cache/
+torchinductor_*/
+.cache/
+**/.cache/
+dist/
+**/dist/
+coverage/
+htmlcov/
+.tmp/
+**/.tmp/
+
+# ---- large / copyrighted source material ----
+*.pdf
+
+# ---- logs / OS ----
+*.log
+.DS_Store
+Thumbs.db

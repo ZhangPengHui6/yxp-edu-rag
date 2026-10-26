@@ -1,0 +1,17 @@
+{
+  "version": "0.2.0",
+  "configurations": [
+    {
+      "name": "Admin API (.env.remote / 远程数据库)",
+      "type": "debugpy",
+      "request": "launch",
+      "module": "uvicorn",
+      "args": ["app.main:app", "--port", "8000", "--reload"],
+      "cwd": "${workspaceFolder}/apps/admin-api",
+      "envFile": "${workspaceFolder}/apps/admin-api/.env.remote",
+      "python": "${workspaceFolder}/apps/admin-api/.venv/Scripts/python.exe",
+      "console": "integratedTerminal",
+      "justMyCode": false
+    }
+  ]
+}

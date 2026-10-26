@@ -1,0 +1,7 @@
+{
+  "python.defaultInterpreterPath": "${workspaceFolder}/apps/admin-api/.venv/Scripts/python.exe",
+  "python.terminal.activateEnvironment": true,
+  "python.analysis.extraPaths": ["${workspaceFolder}/apps/admin-api"],
+  "python.testing.pytestArgs": ["apps/admin-api/tests"],
+  "python.testing.cwd": "${workspaceFolder}/apps/admin-api"
+}

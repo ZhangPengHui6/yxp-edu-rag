@@ -1,0 +1,108 @@
+name: yxp-admin
+
+services:
+  api:
+    build: .
+    ports:
+      - "8000:8000"
+    environment:
+      APP_ENV: production
+      DATABASE_URL: postgresql+asyncpg://yxp:yxp@postgres:5432/yxp
+      MONGO_URL: mongodb://mongo:27017
+      MONGO_DB: yxp
+      REDIS_URL: redis://redis:6379/0
+      TASK_MODE: celery
+      OBJECT_STORAGE: minio
+      MINIO_ENDPOINT: minio:9000
+      MINIO_ACCESS_KEY: yxp
+      MINIO_SECRET_KEY: yxp-secret
+      MINIO_BUCKET: yxp
+      PUBLIC_BASE_URL: http://127.0.0.1:8000
+      JWT_SECRET: change-me-in-production
+      SEED_ON_START: "true"
+      CORS_ORIGINS: http://localhost:5173,http://127.0.0.1:5173
+      # 配置 Milvus 后安装 .[milvus] 并设置：
+      # MILVUS_URI: http://milvus:19530
+    depends_on:
+      postgres:
+        condition: service_healthy
+      mongo:
+        condition: service_healthy
+      redis:
+        condition: service_started
+      minio:
+        condition: service_started
+    command: >
+      sh -c "alembic upgrade head &&
+             uvicorn app.main:app --host 0.0.0.0 --port 8000"
+
+  worker:
+    build: .
+    environment:
+      APP_ENV: production
+      DATABASE_URL: postgresql+asyncpg://yxp:yxp@postgres:5432/yxp
+      MONGO_URL: mongodb://mongo:27017
+      MONGO_DB: yxp
+      REDIS_URL: redis://redis:6379/0
+      TASK_MODE: celery
+      OBJECT_STORAGE: minio
+      MINIO_ENDPOINT: minio:9000
+      MINIO_ACCESS_KEY: yxp
+      MINIO_SECRET_KEY: yxp-secret
+      MINIO_BUCKET: yxp
+      JWT_SECRET: change-me-in-production
+      SEED_ON_START: "false"
+    depends_on:
+      api:
+        condition: service_started
+    command: celery -A app.workers.celery_app worker --loglevel=info --concurrency=2
+
+  postgres:
+    image: postgres:16-alpine
+    environment:
+      POSTGRES_USER: yxp
+      POSTGRES_PASSWORD: yxp
+      POSTGRES_DB: yxp
+    ports:
+      - "5432:5432"
+    volumes:
+      - pgdata:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U yxp"]
+      interval: 5s
+      timeout: 3s
+      retries: 10
+
+  mongo:
+    image: mongo:7
+    ports:
+      - "27017:27017"
+    volumes:
+      - mongodata:/data/db
+    healthcheck:
+      test: ["CMD", "mongosh", "--eval", "db.adminCommand('ping')"]
+      interval: 10s
+      timeout: 5s
+      retries: 10
+
+  redis:
+    image: redis:7-alpine
+    ports:
+      - "6379:6379"
+
+  minio:
+    image: minio/minio:latest
+    command: server /data --console-address ":9001"
+    environment:
+      MINIO_ROOT_USER: yxp
+      MINIO_ROOT_PASSWORD: yxp-secret
+    ports:
+      - "9000:9000"
+      - "9001:9001"
+    volumes:
+      - miniodata:/data
+
+volumes:
+  pgdata:
+  mongodata:
+  miniodata:
